@@ -34,7 +34,7 @@ func getUrlList(fileName string) []string {
 }
 
 func getResponses(urlList []string) []*HttpResponse {
-	ch := make(chan *http.Response)
+	ch := make(chan *HttpResponse)
 	responses := []*HttpResponse{}
 	for _, url := range urlList {
 		go func(url string) {
@@ -50,8 +50,7 @@ func getResponses(urlList []string) []*HttpResponse {
 			fmt.Printf("%s was fetched\n", r.url)
 			responses = append(responses, r)
 			if len(responses) == len(urlList) {
-				// return responses
-				os.Exit(0)
+				return responses
 			}
 		case <-time.After(50 * time.Millisecond):
 			fmt.Printf(".")
