@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 )
 
 type HttpResponse struct {
@@ -32,10 +33,7 @@ func getUrlList(fileName string) []string {
 	return urlList
 }
 
-func main() {
-	fileName := "urls.txt"
-	urlList := getUrlList(fileName)
-
+func getResponses(urlList []string) []*HttpResponse {
 	ch := make(chan *http.Response)
 	responses := []*HttpResponse{}
 	for _, url := range urlList {
@@ -59,6 +57,12 @@ func main() {
 			fmt.Printf(".")
 		}
 	}
+}
+
+func main() {
+	fileName := "urls.txt"
+	urlList := getUrlList(fileName)
+	responses := getResponses(urlList)
 
 	for _, err := range responses {
 		fmt.Println(err)
