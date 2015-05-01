@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net/http"
 	"os"
 )
 
@@ -35,7 +36,8 @@ func main() {
 	fileName := "urls.txt"
 	urlList := getUrlList(fileName)
 
-	ch := make(chan *http.Response, len(urlList))
+	ch := make(chan *http.Response)
+	responses := []*HttpResponse{}
 	for _, url := range urlList {
 		go func(url string) {
 			fmt.Printf("Fetching %s\n", url)
@@ -44,8 +46,19 @@ func main() {
 		}(url)
 	}
 
-	responses := make([]*HttpResponse, len(urlList))
-	responses = <-ch
+	for {
+		select {
+		case r := <-ch:
+			fmt.Printf("%s was fetched\n", r.url)
+			responses = append(responses, r)
+			if len(responses) == len(urlList) {
+				// return responses
+				os.Exit(0)
+			}
+		case <-time.After(50 * time.Millisecond):
+			fmt.Printf(".")
+		}
+	}
 
 	for _, err := range responses {
 		fmt.Println(err)
