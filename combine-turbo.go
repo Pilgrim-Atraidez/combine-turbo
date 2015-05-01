@@ -37,6 +37,8 @@ func getResponses(urlList []string) []*HttpResponse {
 	ch := make(chan *HttpResponse)
 	responses := []*HttpResponse{}
 	for _, url := range urlList {
+		// anonymous function that will actually fetch
+		// TODO: add User-Agent and proxy support
 		go func(url string) {
 			fmt.Printf("Fetching %s\n", url)
 			response, err := http.Get(url)
@@ -49,10 +51,12 @@ func getResponses(urlList []string) []*HttpResponse {
 		case r := <-ch:
 			fmt.Printf("%s was fetched\n", r.url)
 			responses = append(responses, r)
+			// done when we've got the same number of responses
 			if len(responses) == len(urlList) {
 				return responses
 			}
 		case <-time.After(50 * time.Millisecond):
+			// display progress while waiting
 			fmt.Printf(".")
 		}
 	}
@@ -64,6 +68,7 @@ func main() {
 	responses := getResponses(urlList)
 
 	for _, err := range responses {
+		// this actually isn't useful right now
 		fmt.Println(err)
 	}
 }
